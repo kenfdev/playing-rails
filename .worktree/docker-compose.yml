@@ -43,6 +43,9 @@ services:
       # Mount the git common directory at the same absolute host path so
       # .git file references (absolute paths) remain valid inside the container
       - ${GIT_COMMON_DIR}:${GIT_COMMON_DIR}:cached
+      # Persist installed gems across container recreates. Shared by all
+      # worktrees of this project (volume name is project-scoped).
+      - bundle:/usr/local/bundle
 
     # -------------------------------------------------------------------------
     # DO NOT EDIT — container-wt core labels (Traefik routing + metadata)
@@ -94,6 +97,10 @@ services:
 #     name: "${PROJECT_NAME}-go-mod-cache"
 #   pip-cache:
 #     name: "${PROJECT_NAME}-pip-cache"
+
+volumes:
+  bundle:
+    name: "${PROJECT_NAME}-bundle"
 
 # ---------------------------------------------------------------------------
 # DO NOT EDIT — container-wt networking
