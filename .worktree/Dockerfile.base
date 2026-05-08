@@ -1,0 +1,48 @@
+# =============================================================================
+# Team-shared base image. All app and personal Dockerfiles inherit from this.
+#
+# Development-oriented: ships a full Ruby toolchain and the system libraries
+# required to `bundle install` and run this Rails 8 app from inside a
+# container. Keep this list focused on team-wide needs — project-specific
+# extras belong in Dockerfile.app, personal tools in Dockerfile.local.
+# =============================================================================
+
+# Match .ruby-version. Bump in lockstep with the production Dockerfile.
+ARG RUBY_VERSION=3.3.10
+FROM ruby:${RUBY_VERSION}-slim-bookworm
+
+# System packages:
+#   - dev shell basics: curl, git, ca-certificates, zsh, sudo
+#   - native gem build deps: build-essential, pkg-config, libyaml-dev
+#   - sqlite3 gem (dev + Active Record): libsqlite3-dev, sqlite3
+#   - image_processing / Active Storage variants: libvips
+#   - production-parity memory allocator: libjemalloc2
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    git \
+    ca-certificates \
+    zsh \
+    sudo \
+    build-essential \
+    pkg-config \
+    libyaml-dev \
+    libsqlite3-dev \
+    sqlite3 \
+    libvips \
+    libjemalloc2 \
+  && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+ARG USERNAME=vscode
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+RUN groupadd --gid $USER_GID $USERNAME \
+  && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME -s /bin/zsh \
+  && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/$USERNAME
+
+# Let the dev user write to the ruby image's default BUNDLE_PATH so
+# `bundle install` works without sudo.
+RUN chown -R $USERNAME:$USERNAME /usr/local/bundle
+
+USER $USERNAME
+WORKDIR /workspaces
