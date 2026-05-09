@@ -44,3 +44,6 @@
 
 # Tapioca-generated gem RBIs are regenerable via `bin/tapioca gems`
 /sorbet/rbi/gems/
+
+# Local feedback artifacts
+/.feedback/

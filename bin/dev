@@ -5,6 +5,10 @@ if ! gem list foreman -i --silent; then
   gem install foreman
 fi
 
+# Self-heal databases on container rebuild / fresh clone.
+# db:prepare is idempotent — it's a no-op once schemas are loaded.
+bin/rails db:prepare
+
 # Default to port 3000 if not specified
 export PORT="${PORT:-3000}"
 
