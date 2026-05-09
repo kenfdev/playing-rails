@@ -3,20 +3,18 @@
 #
 # Run: docker compose up -d    (from project root)
 # This is completely decoupled from app containers.
-#
-# CUSTOMIZE: Add your own infrastructure services (Postgres, Redis, etc.)
 # =============================================================================
 
-name: ${PROJECT_NAME:-myapp}-infra
+name: ${PROJECT_NAME:-playing-rails}-infra
 
 services:
   traefik:
     image: traefik:v3
-    container_name: "traefik-${PROJECT_NAME:-myapp}"
+    container_name: "traefik-${PROJECT_NAME:-playing-rails}"
     command:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
-      - --providers.docker.network=${NETWORK_NAME:-devnet-myapp}
+      - --providers.docker.network=${NETWORK_NAME:-devnet-playing-rails}
       - --entrypoints.web.address=:80
       - --api.insecure=true
     ports:
@@ -25,42 +23,39 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${PROJECT_NAME:-myapp}.localhost`)"
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${PROJECT_NAME:-playing-rails}.localhost`)"
       - "traefik.http.routers.traefik-dashboard.entrypoints=web"
       - "traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080"
     networks:
       - devnet
     restart: unless-stopped
 
-  # Example infrastructure services.
-  # Uncomment and adapt for your project's needs.
-
-  # postgres:
-  #   image: postgres:16
-  #   container_name: "postgres-${PROJECT_NAME:-myapp}"
-  #   environment:
-  #     POSTGRES_PASSWORD: dev
-  #     POSTGRES_USER: dev
-  #   ports:
-  #     - "${POSTGRES_HOST_PORT:-15432}:5432"
-  #   volumes:
-  #     - pgdata:/var/lib/postgresql/data
-  #   networks:
-  #     - devnet
-  #   restart: unless-stopped
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    container_name: "seaweedfs-${PROJECT_NAME:-playing-rails}"
+    command: server -s3 -dir=/data
+    ports:
+      - "${SEAWEED_S3_PORT:-8333}:8333"
+      - "${SEAWEED_FILER_PORT:-8888}:8888"
+      - "${SEAWEED_MASTER_PORT:-9333}:9333"
+    volumes:
+      - seaweed-data:/data
+    networks:
+      - devnet
+    restart: unless-stopped
 
   # redis:
   #   image: redis:7-alpine
-  #   container_name: "redis-${PROJECT_NAME:-myapp}"
+  #   container_name: "redis-${PROJECT_NAME:-playing-rails}"
   #   networks:
   #     - devnet
   #   restart: unless-stopped
 
-# volumes:
-#   pgdata:
-#     name: "${PROJECT_NAME:-myapp}-pgdata"
+volumes:
+  seaweed-data:
+    name: "${PROJECT_NAME:-playing-rails}-seaweed"
 
 networks:
   devnet:
     external: true
-    name: ${NETWORK_NAME:-devnet-myapp}
+    name: ${NETWORK_NAME:-devnet-playing-rails}
