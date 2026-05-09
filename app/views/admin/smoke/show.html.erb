@@ -1,0 +1,7 @@
+<% if flash[:notice] %>
+  <div class="rounded-md border border-green-200 bg-green-50 text-green-800 px-4 py-2 max-w-xl mx-auto mt-4">
+    <%= flash[:notice] %>
+  </div>
+<% end %>
+
+<%= render SmokeCardComponent.new(user: Current.user) %>
