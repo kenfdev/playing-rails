@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
   resource :session
+  resource :registration, only: %i[new create]
   resources :passwords, param: :token
+
+  get "home", to: "home#show", as: :home
 
   namespace :admin do
     get  "smoke",         to: "smoke#show",    as: :smoke
@@ -15,5 +18,5 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  root "admin/smoke#show"
+  root "home#show"
 end
