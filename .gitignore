@@ -41,3 +41,6 @@
 
 # Personal worktreeinclude (not tracked)
 .worktreeinclude.local
+
+# Tapioca-generated gem RBIs are regenerable via `bin/tapioca gems`
+/sorbet/rbi/gems/

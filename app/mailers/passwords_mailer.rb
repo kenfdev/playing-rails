@@ -1,3 +1,5 @@
+# typed: false
+
 class PasswordsMailer < ApplicationMailer
   def reset(user)
     @user = user
