@@ -44,12 +44,31 @@ services:
       - devnet
     restart: unless-stopped
 
-  # redis:
-  #   image: redis:7-alpine
-  #   container_name: "redis-${PROJECT_NAME:-playing-rails}"
-  #   networks:
-  #     - devnet
-  #   restart: unless-stopped
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: "otel-collector-${PROJECT_NAME:-playing-rails}"
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./config/otel-collector.yaml:/etc/otelcol/config.yaml:ro
+    networks:
+      - devnet
+    restart: unless-stopped
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: "jaeger-${PROJECT_NAME:-playing-rails}"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "${JAEGER_UI_PORT:-16686}:16686"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jaeger.rule=Host(`jaeger.${PROJECT_NAME:-playing-rails}.localhost`)"
+      - "traefik.http.routers.jaeger.entrypoints=web"
+      - "traefik.http.services.jaeger.loadbalancer.server.port=16686"
+    networks:
+      - devnet
+    restart: unless-stopped
 
 volumes:
   seaweed-data:
