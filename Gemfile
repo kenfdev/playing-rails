@@ -6,8 +6,8 @@ gem "rails", "~> 8.1.3"
 gem "propshaft"
 # Use sqlite3 as the database for Active Record
 gem "sqlite3", ">= 2.1"
-# Use the Puma web server [https://github.com/puma/puma]
-gem "puma", ">= 5.0"
+# Use the Falcon application server [https://github.com/socketry/falcon]
+gem "falcon"
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
 gem "importmap-rails"
 # Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
@@ -42,6 +42,24 @@ gem "thruster", require: false
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 1.2"
 
+# Authorization
+gem "pundit"
+
+# View layer
+gem "view_component"
+
+# Static typing
+gem "sorbet-static-and-runtime"
+
+# Logs and traces
+gem "lograge"
+gem "opentelemetry-sdk"
+gem "opentelemetry-exporter-otlp"
+gem "opentelemetry-instrumentation-all"
+
+# Object store (Active Storage S3 adapter)
+gem "aws-sdk-s3", require: false
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
@@ -54,11 +72,20 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  # Test toolchain
+  gem "factory_bot_rails"
+  gem "vcr"
+  gem "webmock"
+  gem "database_cleaner-active_record"
 end
 
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # RBI generator for Sorbet
+  gem "tapioca", require: false
 end
 
 group :test do
