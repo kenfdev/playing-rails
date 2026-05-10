@@ -18,4 +18,18 @@ class SkillTest < ActiveSupport::TestCase
     assert_not duplicate.valid?
     assert_includes duplicate.errors[:name], "has already been taken"
   end
+
+  test "stores a normalized form of the name" do
+    skill = create(:skill, profile: create(:profile), name: "  Ruby on Rails  ")
+    assert_equal "ruby on rails", skill.name_normalized
+  end
+
+  test "DB-level unique index blocks duplicate normalized names across races" do
+    profile = create(:profile)
+    create(:skill, profile: profile, name: "Ruby")
+
+    assert_raises(ActiveRecord::RecordNotUnique) do
+      Skill.insert!({ profile_id: profile.id, name: "RUBY", name_normalized: "ruby" })
+    end
+  end
 end

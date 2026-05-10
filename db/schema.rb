@@ -46,11 +46,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_09_214314) do
   create_table "skills", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name", null: false
-    t.integer "position"
+    t.string "name_normalized", null: false
     t.integer "profile_id", null: false
     t.datetime "updated_at", null: false
-    t.index ["profile_id", "name"], name: "index_skills_on_profile_id_and_name", unique: true
-    t.index ["profile_id"], name: "index_skills_on_profile_id"
+    t.index ["profile_id", "name_normalized"], name: "index_skills_on_profile_id_and_name_normalized", unique: true
   end
 
   create_table "users", force: :cascade do |t|
