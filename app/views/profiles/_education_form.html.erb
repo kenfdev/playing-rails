@@ -1,0 +1,41 @@
+<%
+  url    = entry.persisted? ? profile_education_path(entry) : profile_educations_path
+  method = entry.persisted? ? :patch : :post
+%>
+<%= form_with model: entry, url: url, method: method, scope: :education, class: "space-y-3" do |form| %>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div>
+      <%= form.label :school, class: "block text-sm font-medium" %>
+      <%= form.text_field :school, required: true,
+                          class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
+    </div>
+
+    <div>
+      <%= form.label :degree, class: "block text-sm font-medium" %>
+      <%= form.text_field :degree,
+                          class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
+    </div>
+
+    <div>
+      <%= form.label :field, class: "block text-sm font-medium" %>
+      <%= form.text_field :field,
+                          class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <%= form.label :start_date, class: "block text-sm font-medium" %>
+        <%= form.date_field :start_date,
+                            class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
+      </div>
+      <div>
+        <%= form.label :end_date, class: "block text-sm font-medium" %>
+        <%= form.date_field :end_date,
+                            class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
+      </div>
+    </div>
+  </div>
+
+  <%= form.submit (entry.persisted? ? "Save changes" : "Add education"),
+                  class: "rounded-md px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium cursor-pointer" %>
+<% end %>

@@ -5,6 +5,14 @@ Rails.application.routes.draw do
 
   get "home", to: "home#show", as: :home
 
+  resource :profile, only: %i[edit update] do
+    scope module: :profiles do
+      resources :work_histories, only: %i[create update destroy]
+      resources :educations,     only: %i[create update destroy]
+      resources :skills,         only: %i[create destroy]
+    end
+  end
+
   namespace :admin do
     get  "smoke",         to: "smoke#show",    as: :smoke
     post "smoke/enqueue", to: "smoke#enqueue", as: :smoke_enqueue

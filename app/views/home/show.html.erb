@@ -9,6 +9,10 @@
   </header>
 
   <nav class="space-y-2">
+    <% if Current.user.member? %>
+      <%= link_to "Edit my profile", edit_profile_path, class: "text-blue-600 underline hover:no-underline block" %>
+    <% end %>
+
     <% if Current.user.admin? %>
       <%= link_to "Admin smoke check", admin_smoke_path, class: "text-blue-600 underline hover:no-underline block" %>
     <% end %>

@@ -47,3 +47,6 @@
 
 # Local feedback artifacts
 /.feedback/
+
+# Local AI scratch artifacts
+/.ai-tmp/
