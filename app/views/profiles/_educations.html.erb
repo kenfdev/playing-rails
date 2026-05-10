@@ -3,9 +3,10 @@
 
   <% if profile.persisted? %>
     <ul class="space-y-4" id="educations">
-      <% profile.educations.each do |entry| %>
+      <% profile.educations.reload.each do |entry| %>
+        <% form_entry = (@errored_education&.id == entry.id) ? @errored_education : entry %>
         <li class="border border-gray-200 rounded p-4 space-y-2" id="<%= dom_id(entry) %>">
-          <%= render "education_form", entry: entry %>
+          <%= render "profiles/education_form", entry: form_entry %>
           <%= button_to "Remove",
                          profile_education_path(entry),
                          method: :delete,
@@ -18,6 +19,6 @@
 
   <div class="border border-dashed border-gray-300 rounded p-4">
     <h3 class="font-medium mb-3">Add an education entry</h3>
-    <%= render "education_form", entry: Education.new %>
+    <%= render "profiles/education_form", entry: (@new_education || Education.new) %>
   </div>
 </section>

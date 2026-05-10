@@ -28,6 +28,20 @@ class Profiles::SkillsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "duplicate skill submission re-renders the edit page with the error" do
+    profile = @member.create_profile!
+    create(:skill, profile: profile, name: "Ruby")
+    sign_in_as(@member)
+
+    assert_no_difference -> { Skill.count } do
+      post profile_skills_path, params: { skill: { name: "ruby" } }
+    end
+
+    assert_response :unprocessable_entity
+    assert_match(/Edit profile/, response.body)
+    assert_match(/Name has already been taken/, response.body)
+  end
+
   test "recruiter cannot reach skill endpoints" do
     sign_in_as(create(:user, :recruiter))
 

@@ -9,6 +9,6 @@ class ProfilePolicy < ApplicationPolicy
 
   def own_profile?
     return false unless user&.member? && user.active?
-    record.user_id.nil? || record.user_id == user.id
+    record.user_id == user.id
   end
 end

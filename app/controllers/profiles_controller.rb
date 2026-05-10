@@ -9,7 +9,6 @@ class ProfilesController < ApplicationController
 
   def update
     authorize @profile
-    @profile = Current.user.profile || Current.user.create_profile!
     if @profile.update(profile_params)
       redirect_to edit_profile_path, notice: "Profile updated."
     else
@@ -20,7 +19,9 @@ class ProfilesController < ApplicationController
   private
 
   def load_profile
-    @profile = Current.user.profile || Current.user.build_profile
+    @profile = Current.user.profile || Current.user.create_profile!
+  rescue ActiveRecord::RecordNotUnique
+    @profile = Current.user.reload.profile
   end
 
   def profile_params

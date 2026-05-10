@@ -9,7 +9,8 @@ class Profiles::SkillsController < ApplicationController
     if @skill.save
       redirect_to edit_profile_path, notice: "Skill added."
     else
-      redirect_to edit_profile_path, alert: "Could not add skill: #{@skill.errors.full_messages.to_sentence}"
+      @new_skill = @skill
+      render template: "profiles/edit", status: :unprocessable_entity
     end
   end
 
@@ -23,7 +24,7 @@ class Profiles::SkillsController < ApplicationController
   private
 
   def load_profile
-    @profile = Current.user.profile || Current.user.create_profile!
+    @profile = Current.user.profile || Current.user.build_profile
   end
 
   def skill_params

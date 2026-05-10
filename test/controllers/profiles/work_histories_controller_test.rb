@@ -64,6 +64,35 @@ class Profiles::WorkHistoriesControllerTest < ActionDispatch::IntegrationTest
     assert_not_equal "Hacker", entry.reload.title
   end
 
+  test "create failure re-renders the edit page with field-level errors" do
+    sign_in_as(@member)
+
+    assert_no_difference -> { WorkHistory.count } do
+      post profile_work_histories_path, params: {
+        work_history: { company: "", title: "", start_date: "" }
+      }
+    end
+
+    assert_response :unprocessable_entity
+    assert_match(/Edit profile/, response.body)
+    assert_match(/Company can&#39;t be blank/, response.body)
+    assert_match(/Title can&#39;t be blank/, response.body)
+  end
+
+  test "update failure re-renders the edit page and leaves the row unchanged" do
+    profile = @member.create_profile!
+    entry   = create(:work_history, profile: profile, title: "Engineer")
+    sign_in_as(@member)
+
+    patch profile_work_history_path(entry), params: {
+      work_history: { company: entry.company, title: "", start_date: entry.start_date.iso8601 }
+    }
+
+    assert_response :unprocessable_entity
+    assert_match(/Title can&#39;t be blank/, response.body)
+    assert_equal "Engineer", entry.reload.title
+  end
+
   test "recruiter cannot create work histories" do
     recruiter = create(:user, :recruiter)
     sign_in_as(recruiter)

@@ -9,7 +9,8 @@ class Profiles::EducationsController < ApplicationController
     if @education.save
       redirect_to edit_profile_path, notice: "Education added."
     else
-      redirect_to edit_profile_path, alert: error_message(@education)
+      @new_education = @education
+      render template: "profiles/edit", status: :unprocessable_entity
     end
   end
 
@@ -19,7 +20,8 @@ class Profiles::EducationsController < ApplicationController
     if @education.update(education_params)
       redirect_to edit_profile_path, notice: "Education updated."
     else
-      redirect_to edit_profile_path, alert: error_message(@education)
+      @errored_education = @education
+      render template: "profiles/edit", status: :unprocessable_entity
     end
   end
 
@@ -33,14 +35,10 @@ class Profiles::EducationsController < ApplicationController
   private
 
   def load_profile
-    @profile = Current.user.profile || Current.user.create_profile!
+    @profile = Current.user.profile || Current.user.build_profile
   end
 
   def education_params
     params.expect(education: %i[school degree field start_date end_date])
-  end
-
-  def error_message(record)
-    "Could not save education: #{record.errors.full_messages.to_sentence}"
   end
 end

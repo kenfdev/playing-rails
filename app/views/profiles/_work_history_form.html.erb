@@ -3,6 +3,16 @@
   method = entry.persisted? ? :patch : :post
 %>
 <%= form_with model: entry, url: url, method: method, scope: :work_history, class: "space-y-3" do |form| %>
+  <% if entry.errors.any? %>
+    <div class="py-2 px-3 bg-red-50 text-red-500 font-medium rounded-lg">
+      <ul class="list-disc list-inside">
+        <% entry.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
     <div>
       <%= form.label :company, class: "block text-sm font-medium" %>

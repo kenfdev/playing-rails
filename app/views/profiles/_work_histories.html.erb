@@ -3,9 +3,10 @@
 
   <% if profile.persisted? %>
     <ul class="space-y-4" id="work-histories">
-      <% profile.work_histories.each do |entry| %>
+      <% profile.work_histories.reload.each do |entry| %>
+        <% form_entry = (@errored_work_history&.id == entry.id) ? @errored_work_history : entry %>
         <li class="border border-gray-200 rounded p-4 space-y-2" id="<%= dom_id(entry) %>">
-          <%= render "work_history_form", entry: entry %>
+          <%= render "profiles/work_history_form", entry: form_entry %>
           <%= button_to "Remove",
                          profile_work_history_path(entry),
                          method: :delete,
@@ -18,6 +19,6 @@
 
   <div class="border border-dashed border-gray-300 rounded p-4">
     <h3 class="font-medium mb-3">Add a work history entry</h3>
-    <%= render "work_history_form", entry: WorkHistory.new %>
+    <%= render "profiles/work_history_form", entry: (@new_work_history || WorkHistory.new) %>
   </div>
 </section>
