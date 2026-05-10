@@ -1,0 +1,24 @@
+<section class="space-y-4 border border-gray-200 rounded-lg p-5">
+  <h2 class="font-semibold text-xl">Education</h2>
+
+  <% if profile.persisted? %>
+    <ul class="space-y-4" id="educations">
+      <% profile.educations.reload.each do |entry| %>
+        <% form_entry = (@errored_education&.id == entry.id) ? @errored_education : entry %>
+        <li class="border border-gray-200 rounded p-4 space-y-2" id="<%= dom_id(entry) %>">
+          <%= render "profiles/education_form", entry: form_entry %>
+          <%= button_to "Remove",
+                         profile_education_path(entry),
+                         method: :delete,
+                         data: { turbo_confirm: "Remove this education entry?" },
+                         class: "text-sm text-red-600 underline hover:no-underline cursor-pointer" %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <div class="border border-dashed border-gray-300 rounded p-4">
+    <h3 class="font-medium mb-3">Add an education entry</h3>
+    <%= render "profiles/education_form", entry: (@new_education || Education.new) %>
+  </div>
+</section>

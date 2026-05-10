@@ -10,7 +10,30 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_09_011004) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_09_214314) do
+  create_table "educations", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "degree"
+    t.date "end_date"
+    t.string "field"
+    t.integer "profile_id", null: false
+    t.string "school", null: false
+    t.date "start_date"
+    t.datetime "updated_at", null: false
+    t.index ["profile_id"], name: "index_educations_on_profile_id"
+  end
+
+  create_table "profiles", force: :cascade do |t|
+    t.text "bio"
+    t.datetime "created_at", null: false
+    t.string "headline"
+    t.string "name"
+    t.datetime "profile_updated_at"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_profiles_on_user_id", unique: true
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "ip_address"
@@ -18,6 +41,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_09_011004) do
     t.string "user_agent"
     t.integer "user_id", null: false
     t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
+  create_table "skills", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.string "name_normalized", null: false
+    t.integer "profile_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["profile_id", "name_normalized"], name: "index_skills_on_profile_id_and_name_normalized", unique: true
   end
 
   create_table "users", force: :cascade do |t|
@@ -31,5 +63,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_09_011004) do
     t.index ["role"], name: "index_users_on_role"
   end
 
+  create_table "work_histories", force: :cascade do |t|
+    t.string "company", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.date "end_date"
+    t.integer "profile_id", null: false
+    t.date "start_date", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["profile_id"], name: "index_work_histories_on_profile_id"
+  end
+
+  add_foreign_key "educations", "profiles"
+  add_foreign_key "profiles", "users"
   add_foreign_key "sessions", "users"
+  add_foreign_key "skills", "profiles"
+  add_foreign_key "work_histories", "profiles"
 end

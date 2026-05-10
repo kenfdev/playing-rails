@@ -9,6 +9,11 @@
   </header>
 
   <nav class="space-y-2">
+    <% profile_for_policy = Current.user.profile || Current.user.build_profile %>
+    <% if policy(profile_for_policy).edit? %>
+      <%= link_to "Edit my profile", edit_profile_path, class: "text-blue-600 underline hover:no-underline block" %>
+    <% end %>
+
     <% if Current.user.admin? %>
       <%= link_to "Admin smoke check", admin_smoke_path, class: "text-blue-600 underline hover:no-underline block" %>
     <% end %>

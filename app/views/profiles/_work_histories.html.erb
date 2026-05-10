@@ -1,0 +1,24 @@
+<section class="space-y-4 border border-gray-200 rounded-lg p-5">
+  <h2 class="font-semibold text-xl">Work history</h2>
+
+  <% if profile.persisted? %>
+    <ul class="space-y-4" id="work-histories">
+      <% profile.work_histories.reload.each do |entry| %>
+        <% form_entry = (@errored_work_history&.id == entry.id) ? @errored_work_history : entry %>
+        <li class="border border-gray-200 rounded p-4 space-y-2" id="<%= dom_id(entry) %>">
+          <%= render "profiles/work_history_form", entry: form_entry %>
+          <%= button_to "Remove",
+                         profile_work_history_path(entry),
+                         method: :delete,
+                         data: { turbo_confirm: "Remove this work history entry?" },
+                         class: "text-sm text-red-600 underline hover:no-underline cursor-pointer" %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <div class="border border-dashed border-gray-300 rounded p-4">
+    <h3 class="font-medium mb-3">Add a work history entry</h3>
+    <%= render "profiles/work_history_form", entry: (@new_work_history || WorkHistory.new) %>
+  </div>
+</section>

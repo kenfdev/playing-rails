@@ -91,5 +91,7 @@ end
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
-  gem "selenium-webdriver"
+  gem "capybara-playwright-driver"
+  # Capybara needs a Rack server during system tests; the app itself runs on Falcon in production/dev.
+  gem "puma"
 end

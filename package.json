@@ -1,0 +1,11 @@
+{
+  "name": "basic-profile",
+  "private": true,
+  "description": "Node tooling for Playwright-driven Rails system tests. The app itself uses importmaps for runtime JS.",
+  "devDependencies": {
+    "playwright": "1.59.0"
+  },
+  "scripts": {
+    "playwright:install": "playwright install --with-deps chromium"
+  }
+}
