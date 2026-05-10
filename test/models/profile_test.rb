@@ -3,30 +3,23 @@
 require "test_helper"
 
 class ProfileTest < ActiveSupport::TestCase
-  test "stamps profile_updated_at on save" do
+  test "saving the parent alone does not stamp profile_updated_at" do
     user = create(:user, :member)
     profile = user.create_profile!(name: "Alice", headline: "Engineer")
 
-    assert_not_nil profile.profile_updated_at
-    first_stamp = profile.profile_updated_at
+    assert_nil profile.profile_updated_at, "parent-only saves should not bump profile_updated_at"
 
-    travel 1.minute do
-      profile.update!(headline: "Senior Engineer")
-    end
-
-    assert profile.profile_updated_at > first_stamp,
-           "expected profile_updated_at to advance when basic fields change"
+    profile.update!(headline: "Senior Engineer")
+    assert_nil profile.reload.profile_updated_at
   end
 
   test "saving a child work_history bumps profile_updated_at" do
     profile = create(:profile)
-    initial = profile.profile_updated_at
+    assert_nil profile.profile_updated_at
 
-    travel 1.minute do
-      create(:work_history, profile: profile)
-    end
+    create(:work_history, profile: profile)
 
-    assert profile.reload.profile_updated_at > initial
+    assert_not_nil profile.reload.profile_updated_at
   end
 
   test "destroying a child education bumps profile_updated_at" do

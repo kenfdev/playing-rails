@@ -9,12 +9,4 @@ class Profile < ApplicationRecord
   validates :name,     length: { maximum: 120 }, allow_blank: true
   validates :headline, length: { maximum: 200 }, allow_blank: true
   validates :bio,      length: { maximum: 2000 }, allow_blank: true
-
-  before_save :stamp_profile_updated_at
-
-  private
-
-  def stamp_profile_updated_at
-    self.profile_updated_at = Time.current
-  end
 end
