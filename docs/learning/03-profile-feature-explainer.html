@@ -1,0 +1,934 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>basic-profile branch · Rails-for-TS-experts walkthrough</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #111827;
+    --panel-2: #0b1222;
+    --ink: #e5e7eb;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --line: #1f2937;
+
+    /* layer palette */
+    --route:    #fbbf24; /* amber */
+    --ctrl:     #60a5fa; /* blue */
+    --policy:   #f472b6; /* pink */
+    --model:    #34d399; /* green */
+    --concern:  #c084fc; /* purple */
+    --view:     #fb923c; /* orange */
+    --db:       #22d3ee; /* cyan */
+
+    --route-bg:   rgba(251,191,36,.10);
+    --ctrl-bg:    rgba(96,165,250,.10);
+    --policy-bg:  rgba(244,114,182,.10);
+    --model-bg:   rgba(52,211,153,.10);
+    --concern-bg: rgba(192,132,252,.10);
+    --view-bg:    rgba(251,146,60,.10);
+    --db-bg:      rgba(34,211,238,.10);
+  }
+
+  * { box-sizing: border-box; min-width: 0; }
+  html, body {
+    background: linear-gradient(180deg, #0b1020, #0f172a 30%);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    margin: 0; padding: 0; line-height: 1.55;
+    overflow-x: hidden;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 32px 20px 96px; }
+  h1 { font-size: 34px; margin: 0 0 6px; letter-spacing: -0.02em; }
+  h2 { font-size: 24px; margin: 56px 0 16px; letter-spacing: -0.01em; }
+  h3 { font-size: 18px; margin: 28px 0 10px; }
+  h4 { font-size: 15px; margin: 20px 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  p { color: #cbd5e1; }
+  a { color: var(--accent); }
+  code, pre, .mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+  p code, li code, td code, .annot code { word-break: break-word; }
+  pre {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    margin: 8px 0;
+    max-width: 100%;
+  }
+  pre code { white-space: pre; }
+  .path { word-break: break-all; }
+  .lede {
+    color: #cbd5e1;
+    font-size: 16px;
+    border-left: 3px solid var(--accent);
+    padding: 6px 14px;
+    background: rgba(56,189,248,0.06);
+    border-radius: 4px;
+  }
+
+  /* layered cards */
+  .grid { display: grid; gap: 16px; }
+  .grid-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+  .card.tight { padding: 14px 16px; }
+
+  .pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: 1px solid;
+    margin-right: 6px;
+  }
+  .pill.route   { color: var(--route);   border-color: var(--route);   background: var(--route-bg); }
+  .pill.ctrl    { color: var(--ctrl);    border-color: var(--ctrl);    background: var(--ctrl-bg); }
+  .pill.policy  { color: var(--policy);  border-color: var(--policy);  background: var(--policy-bg); }
+  .pill.model   { color: var(--model);   border-color: var(--model);   background: var(--model-bg); }
+  .pill.concern { color: var(--concern); border-color: var(--concern); background: var(--concern-bg); }
+  .pill.view    { color: var(--view);    border-color: var(--view);    background: var(--view-bg); }
+  .pill.db      { color: var(--db);      border-color: var(--db);      background: var(--db-bg); }
+
+  /* file path */
+  .path {
+    color: var(--muted);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12px;
+  }
+
+  /* code annotation: tooltip-callout side-by-side */
+  .annotated {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+  @media (min-width: 1000px) {
+    .annotated { grid-template-columns: 1.1fr 1fr; }
+  }
+  .annot {
+    background: var(--panel-2);
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #cbd5e1;
+  }
+  .annot ul { margin: 0; padding-left: 18px; }
+  .annot li { margin-bottom: 6px; }
+
+  /* small label tag */
+  .tag {
+    display: inline-block; padding: 1px 7px; border-radius: 4px;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px; background: #1e293b; color: #93c5fd; border: 1px solid #1f2937;
+  }
+
+  /* TS-vs-Rails comparison table */
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; border: 1px solid var(--line); }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; min-width: 540px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; background: #0b1222; }
+  td code { color: #e2e8f0; word-break: break-word; }
+
+  /* request flow diagram — vertical timeline */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 14px 0 6px;
+    position: relative;
+    padding-left: 28px;
+  }
+  .flow::before {
+    content: "";
+    position: absolute;
+    left: 11px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: linear-gradient(180deg, var(--route), var(--ctrl), var(--policy), var(--model), var(--db), var(--view));
+    border-radius: 2px;
+    opacity: 0.5;
+  }
+  .flow .step {
+    position: relative;
+    border-radius: 10px;
+    padding: 10px 14px;
+    border: 1px solid;
+    font-size: 13px;
+    background: #0b1222;
+  }
+  .flow .step::before {
+    content: "";
+    position: absolute;
+    left: -22px; top: 14px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    background: #0b1222;
+  }
+  .flow .step .h {
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .flow .step.s-route   { border-color: var(--route);   color: #fde68a; }
+  .flow .step.s-ctrl    { border-color: var(--ctrl);    color: #bfdbfe; }
+  .flow .step.s-policy  { border-color: var(--policy);  color: #fbcfe8; }
+  .flow .step.s-model   { border-color: var(--model);   color: #a7f3d0; }
+  .flow .step.s-db      { border-color: var(--db);      color: #a5f3fc; }
+  .flow .step.s-view    { border-color: var(--view);    color: #fed7aa; }
+  .flow .arrow { display: none; }
+
+  /* ER diagram (CSS boxes) */
+  .er {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin: 14px 0;
+  }
+  @media (max-width: 900px) {
+    .er { grid-template-columns: 1fr; }
+  }
+  .entity {
+    border: 1px solid var(--model);
+    background: var(--model-bg);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .entity h5 { margin: 0 0 6px; color: #d1fae5; font-size: 14px; letter-spacing: 0.04em; }
+  .entity .field { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12px; color: #cbd5e1; }
+  .entity .field .pk { color: #fcd34d; }
+  .entity .field .fk { color: #f9a8d4; }
+  .entity .rel { color: var(--muted); font-size: 12px; margin-top: 8px; }
+
+  /* ToC as collapsible details */
+  details.toc {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 8px 14px; font-size: 13px; margin: 24px 0 8px;
+  }
+  details.toc summary {
+    cursor: pointer; padding: 6px 0; font-weight: 600; color: #cbd5e1; list-style: none;
+  }
+  details.toc summary::-webkit-details-marker { display: none; }
+  details.toc summary::before { content: "▸ "; color: var(--accent); }
+  details.toc[open] summary::before { content: "▾ "; }
+  details.toc .toc-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 4px;
+    margin-top: 8px; padding-bottom: 8px;
+  }
+  details.toc a { display: block; padding: 4px 6px; border-radius: 6px; color: #cbd5e1; text-decoration: none; }
+  details.toc a:hover { background: #0b1222; color: var(--accent); }
+
+  .key-callout {
+    border-left: 3px solid var(--accent);
+    background: rgba(56,189,248,0.06);
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin: 10px 0;
+    color: #e2e8f0;
+    font-size: 14px;
+  }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 0;
+    font-size: 12px;
+  }
+  .legend .item { display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); }
+  .legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  hr { border: 0; border-top: 1px solid var(--line); margin: 36px 0; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <p style="color:var(--muted); margin:0 0 6px; font-size:13px; letter-spacing:0.06em;">BRANCH · basic-profile</p>
+      <h1>What this Rails branch actually does</h1>
+      <p class="lede">A walkthrough of the <strong>basic-profile</strong> feature aimed at a TypeScript engineer. We map every Rails concept onto something familiar (Express / NestJS / Prisma), and then read the actual code in this repo.</p>
+
+      <div class="legend">
+        <span class="item"><span class="dot" style="background:var(--route)"></span>Routes</span>
+        <span class="item"><span class="dot" style="background:var(--ctrl)"></span>Controllers</span>
+        <span class="item"><span class="dot" style="background:var(--policy)"></span>Policies (Pundit)</span>
+        <span class="item"><span class="dot" style="background:var(--model)"></span>Models (ActiveRecord)</span>
+        <span class="item"><span class="dot" style="background:var(--concern)"></span>Concerns (mixins)</span>
+        <span class="item"><span class="dot" style="background:var(--view)"></span>Views (ERB)</span>
+        <span class="item"><span class="dot" style="background:var(--db)"></span>Database / migrations</span>
+      </div>
+    </header>
+
+    <details class="toc" open>
+      <summary>Contents</summary>
+      <div class="toc-grid">
+        <a href="#feature">1. The feature in one paragraph</a>
+        <a href="#mental-model">2. Rails vs TS — mental model</a>
+        <a href="#layers">3. The layers in this branch</a>
+        <a href="#er">4. Data model (ER diagram)</a>
+        <a href="#routes">5. Routes</a>
+        <a href="#request">6. Request lifecycle</a>
+        <a href="#models">7. Models &amp; ActiveRecord magic</a>
+        <a href="#policies">8. Authorization (Pundit)</a>
+        <a href="#controllers">9. Controllers in detail</a>
+        <a href="#concerns">10. Concerns (the mixin pattern)</a>
+        <a href="#views">11. Views &amp; partials</a>
+        <a href="#race">12. Subtle bits worth understanding</a>
+        <a href="#cheatsheet">13. Cheatsheet</a>
+      </div>
+    </details>
+
+    <main>
+
+      <!-- =========================================================== -->
+      <h2 id="feature">1. The feature in one paragraph</h2>
+      <p>
+        A signed-in <strong>member</strong> can edit <em>their own</em> profile: a basic info card (name / headline / bio),
+        plus three list-style sections — <strong>work history</strong>, <strong>education</strong>, and <strong>skills</strong>.
+        Everything happens on a single page <code>/profile/edit</code>, with each list item driven by its own
+        nested resource (<code>POST /profile/work_histories</code>, <code>PATCH /profile/work_histories/:id</code>, etc.).
+        Authorization is enforced by <strong>Pundit</strong> policies: only the profile owner (and only if they're an active member) can mutate their data.
+      </p>
+
+      <!-- =========================================================== -->
+      <h2 id="mental-model">2. Rails vs TypeScript — mental model</h2>
+      <p>If you've used NestJS + Prisma, this maps cleanly. Rails just bundles all of these into one framework with strong conventions:</p>
+
+      <div class="table-scroll"><table>
+        <thead><tr><th style="width:25%">Rails concept</th><th>TS equivalent</th><th>What this branch does with it</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="pill route">Route</span> <code>config/routes.rb</code></td>
+            <td>Express router / Nest <code>@Controller</code> decorators</td>
+            <td>RESTful URLs that auto-generate path helpers like <code>edit_profile_path</code>, <code>profile_skill_path(skill)</code>.</td>
+          </tr>
+          <tr>
+            <td><span class="pill ctrl">Controller</span> <code>app/controllers/*</code></td>
+            <td>Express handler / Nest controller method</td>
+            <td>One Ruby class per resource. Methods like <code>create</code>/<code>update</code>/<code>destroy</code> map to HTTP verbs by convention.</td>
+          </tr>
+          <tr>
+            <td><span class="pill model">ActiveRecord model</span> <code>app/models/*</code></td>
+            <td>Prisma client + Zod validators, fused</td>
+            <td>Class = ORM mapper + validation + business rules. <code>belongs_to :profile</code> sets up the relation.</td>
+          </tr>
+          <tr>
+            <td><span class="pill db">Migration</span> <code>db/migrate/*</code></td>
+            <td>Prisma migration / Drizzle SQL migration</td>
+            <td>Each file is one DDL change. Rails generates <code>db/schema.rb</code> from the cumulative state.</td>
+          </tr>
+          <tr>
+            <td><span class="pill policy">Policy (Pundit)</span> <code>app/policies/*</code></td>
+            <td>NestJS guards / CASL abilities</td>
+            <td>One <code>FooPolicy</code> per model with predicates (<code>create?</code>, <code>destroy?</code>). <code>authorize @foo</code> in the controller fails fast with 403.</td>
+          </tr>
+          <tr>
+            <td><span class="pill concern">Concern</span> <code>app/**/concerns/*</code></td>
+            <td>TS mixin / interface with default implementations</td>
+            <td>A Ruby module designed to be <code>include</code>d. Used here for <code>DateRange</code> (shared validator) and <code>ProfileScopedPolicy</code> (shared <code>own_profile?</code>).</td>
+          </tr>
+          <tr>
+            <td><span class="pill view">View / ERB partial</span> <code>app/views/**/_*.html.erb</code></td>
+            <td>JSX-on-the-server (think Astro components rendered by Express)</td>
+            <td>Partial templates (filename starts with <code>_</code>) that get rendered server-side, sprinkled with form helpers.</td>
+          </tr>
+          <tr>
+            <td><code>Current.user</code></td>
+            <td><code>AsyncLocalStorage</code> with the current request's user</td>
+            <td>Request-scoped global so you don't pass <code>req.user</code> everywhere. Set by <code>Authentication</code> concern, read by controllers + Pundit.</td>
+          </tr>
+          <tr>
+            <td><code>params.expect(...)</code></td>
+            <td>Zod / class-validator schema</td>
+            <td>Rails 8's strict allow-list for incoming params. Anything not listed is dropped (and unexpected shapes raise) — same role as a DTO.</td>
+          </tr>
+        </tbody>
+      </table></div>
+
+      <!-- =========================================================== -->
+      <h2 id="layers">3. The layers introduced by this branch</h2>
+
+      <p>The branch adds a vertical slice across <strong>seven</strong> Rails layers. Reading top-down on a request:</p>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <span class="pill route">Routes</span>
+          <p style="margin:8px 0 6px"><span class="path">config/routes.rb</span></p>
+          <p>Declares URLs and which controller#action handles each one. Gives you typed helpers (<code>edit_profile_path</code>) and RESTful conventions for nested resources.</p>
+        </div>
+        <div class="card">
+          <span class="pill ctrl">Controllers</span>
+          <p style="margin:8px 0 6px"><span class="path">app/controllers/profiles_controller.rb</span><br/><span class="path">app/controllers/profiles/{work_histories,educations,skills}_controller.rb</span></p>
+          <p>Receive HTTP, run <code>before_action</code> hooks (auth, profile loading), call <code>authorize</code>, mutate models, then redirect or re-render.</p>
+        </div>
+        <div class="card">
+          <span class="pill policy">Policies</span>
+          <p style="margin:8px 0 6px"><span class="path">app/policies/{profile,work_history,education,skill}_policy.rb</span><br/><span class="path">app/policies/concerns/profile_scoped_policy.rb</span></p>
+          <p>Pure functions answering "is <em>this user</em> allowed to do <em>this action</em> on <em>this record</em>?" Controllers raise 403 automatically if the answer is no.</p>
+        </div>
+        <div class="card">
+          <span class="pill model">Models</span>
+          <p style="margin:8px 0 6px"><span class="path">app/models/{profile,work_history,education,skill}.rb</span></p>
+          <p>ActiveRecord classes. They define associations, validation rules, and small lifecycle callbacks (e.g. <code>before_validation :normalize_name</code>).</p>
+        </div>
+        <div class="card">
+          <span class="pill concern">Concerns</span>
+          <p style="margin:8px 0 6px"><span class="path">app/models/concerns/date_range.rb</span><br/><span class="path">app/policies/concerns/profile_scoped_policy.rb</span></p>
+          <p>Reusable mixins. <code>DateRange</code> adds an "end ≥ start" validator. <code>ProfileScopedPolicy</code> shares the "owner-only" rule across child policies.</p>
+        </div>
+        <div class="card">
+          <span class="pill view">Views / partials</span>
+          <p style="margin:8px 0 6px"><span class="path">app/views/profiles/edit.html.erb</span><br/><span class="path">app/views/profiles/_basic_form.html.erb</span> ... etc.</p>
+          <p>HTML templates with embedded Ruby. Each section of the page is a partial that takes a <code>profile</code> local. Forms render error lists and use Rails URL helpers.</p>
+        </div>
+        <div class="card" style="grid-column: span 2">
+          <span class="pill db">Database / migrations</span>
+          <p style="margin:8px 0 6px"><span class="path">db/migrate/2026050921431{1..4}_create_*.rb</span> &nbsp;·&nbsp; <span class="path">db/schema.rb</span></p>
+          <p>Four new tables: <code>profiles</code> (1:1 with users), <code>work_histories</code> / <code>educations</code> (n per profile, ordered by start_date desc), <code>skills</code> (unique per profile via a normalized name).</p>
+        </div>
+      </div>
+
+      <!-- =========================================================== -->
+      <h2 id="er">4. Data model</h2>
+
+      <div class="er">
+        <div class="entity" style="border-color: var(--ctrl); background: var(--ctrl-bg);">
+          <h5 style="color:#bfdbfe;">users <em style="color:var(--muted); font-style:normal; font-size:11px">(pre-existing)</em></h5>
+          <div class="field"><span class="pk">id</span> bigint pk</div>
+          <div class="field">email_address string</div>
+          <div class="field">role enum (member / recruiter / admin)</div>
+          <div class="field">active boolean</div>
+          <div class="rel">has_one :profile</div>
+        </div>
+        <div class="entity">
+          <h5>profiles</h5>
+          <div class="field"><span class="pk">id</span> bigint pk</div>
+          <div class="field"><span class="fk">user_id</span> fk → users <strong>(unique)</strong></div>
+          <div class="field">name, headline string</div>
+          <div class="field">bio text</div>
+          <div class="field">profile_updated_at datetime</div>
+          <div class="rel">has_many :work_histories, :educations, :skills</div>
+        </div>
+        <div class="entity">
+          <h5>work_histories</h5>
+          <div class="field"><span class="pk">id</span> bigint pk</div>
+          <div class="field"><span class="fk">profile_id</span> fk → profiles</div>
+          <div class="field">company, title string (NOT NULL)</div>
+          <div class="field">start_date date (NOT NULL)</div>
+          <div class="field">end_date date (nullable = "still here")</div>
+          <div class="field">description text</div>
+        </div>
+        <div class="entity">
+          <h5>educations</h5>
+          <div class="field"><span class="pk">id</span> bigint pk</div>
+          <div class="field"><span class="fk">profile_id</span> fk → profiles</div>
+          <div class="field">school string (NOT NULL)</div>
+          <div class="field">degree, field string</div>
+          <div class="field">start_date / end_date date</div>
+        </div>
+        <div class="entity">
+          <h5>skills</h5>
+          <div class="field"><span class="pk">id</span> bigint pk</div>
+          <div class="field"><span class="fk">profile_id</span> fk → profiles</div>
+          <div class="field">name string</div>
+          <div class="field">name_normalized string <strong>(unique per profile)</strong></div>
+        </div>
+        <div class="entity" style="border-style: dashed; opacity: 0.7;">
+          <h5 style="color:#a7f3d0">Why a unique index on <code>(profile_id, name_normalized)</code>?</h5>
+          <p style="font-size:12px; color:#cbd5e1; margin:6px 0 0">
+            So that "Ruby" and "ruby " collapse to the same skill. The <code>name_normalized</code> column is filled by a
+            <code>before_validation</code> hook in <code>Skill</code> — see §7.
+          </p>
+        </div>
+      </div>
+
+      <!-- =========================================================== -->
+      <h2 id="routes">5. Routes</h2>
+      <p><span class="path">config/routes.rb</span></p>
+
+      <div class="annotated">
+<pre><code>resource :profile, only: %i[edit update] do
+  scope module: :profiles do
+    resources :work_histories, only: %i[create update destroy]
+    resources :educations,     only: %i[create update destroy]
+    resources :skills,         only: %i[create destroy]
+  end
+end</code></pre>
+        <div class="annot">
+          <ul>
+            <li><code>resource</code> (singular) → there's only ever <em>one</em> profile per current user, so URLs have no <code>:id</code>: <code>/profile/edit</code>, <code>PATCH /profile</code>.</li>
+            <li><code>resources</code> (plural) → many work histories, educations, skills.</li>
+            <li><code>scope module: :profiles</code> means <em>controllers live under the <code>Profiles::</code> namespace</em>, but the <strong>URL stays flat</strong> (<code>/profile/work_histories/3</code>), not <code>/profiles/work_histories/3</code>. Pure code organization.</li>
+            <li>Routes auto-generate path helpers used in views: <code>edit_profile_path</code>, <code>profile_work_history_path(entry)</code>, <code>profile_skills_path</code>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4>The eight URLs this branch adds</h4>
+      <div class="table-scroll"><table>
+        <thead><tr><th>Verb</th><th>Path</th><th>Controller#action</th></tr></thead>
+        <tbody>
+          <tr><td>GET</td><td><code>/profile/edit</code></td><td><code>profiles#edit</code></td></tr>
+          <tr><td>PATCH</td><td><code>/profile</code></td><td><code>profiles#update</code></td></tr>
+          <tr><td>POST</td><td><code>/profile/work_histories</code></td><td><code>profiles/work_histories#create</code></td></tr>
+          <tr><td>PATCH</td><td><code>/profile/work_histories/:id</code></td><td><code>profiles/work_histories#update</code></td></tr>
+          <tr><td>DELETE</td><td><code>/profile/work_histories/:id</code></td><td><code>profiles/work_histories#destroy</code></td></tr>
+          <tr><td>POST/PATCH/DELETE</td><td><code>/profile/educations[/:id]</code></td><td><code>profiles/educations#…</code></td></tr>
+          <tr><td>POST</td><td><code>/profile/skills</code></td><td><code>profiles/skills#create</code></td></tr>
+          <tr><td>DELETE</td><td><code>/profile/skills/:id</code></td><td><code>profiles/skills#destroy</code></td></tr>
+        </tbody>
+      </table></div>
+
+      <!-- =========================================================== -->
+      <h2 id="request">6. Request lifecycle (an "Add work history" click)</h2>
+
+      <div class="flow">
+        <div class="step s-route">
+          <div class="h">1 · Router</div>
+          <code>POST /profile/work_histories</code> → <code>Profiles::WorkHistoriesController#create</code>
+        </div>
+        <div class="step s-ctrl">
+          <div class="h">2 · before_action · require_authentication</div>
+          From the <code>Authentication</code> concern (inherited via <code>ApplicationController</code>). Loads <code>Current.user</code> from the session cookie.
+        </div>
+        <div class="step s-ctrl">
+          <div class="h">3 · before_action · load_profile</div>
+          Sets <code>@profile = Current.user.profile || build_profile</code>.
+        </div>
+        <div class="step s-ctrl">
+          <div class="h">4 · Strong params</div>
+          <code>params.expect(work_history: %i[company title start_date end_date description])</code>
+        </div>
+        <div class="step s-policy">
+          <div class="h">5 · Pundit</div>
+          <code>authorize @work_history</code> calls <code>WorkHistoryPolicy#create?</code>. If false → 403.
+        </div>
+        <div class="step s-model">
+          <div class="h">6 · Validations</div>
+          Model runs <code>validates :company, :title, :start_date</code> and the <code>DateRange</code> concern's <code>end_date_after_start_date</code>.
+        </div>
+        <div class="step s-db">
+          <div class="h">7 · DB</div>
+          On <code>save</code>, AR INSERTs into <code>work_histories</code> and <code>touch</code>es <code>profiles.profile_updated_at</code>.
+        </div>
+        <div class="step s-view">
+          <div class="h">8 · Response</div>
+          Success → 302 redirect to <code>/profile/edit</code> with flash <code>"Work history added."</code>. Validation errors → re-render <code>profiles/edit</code> with status 422.
+        </div>
+      </div>
+
+      <div class="key-callout">
+        <strong>Why the redirect on success?</strong> This is the classic <em>POST/Redirect/GET</em> pattern.
+        The browser then issues a fresh <code>GET /profile/edit</code> that re-reads from the DB,
+        so a refresh doesn't re-submit the form. On failure we render the page directly (no redirect)
+        so we can keep the in-memory model with its <code>errors</code> attached.
+      </div>
+
+      <!-- =========================================================== -->
+      <h2 id="models">7. Models &amp; ActiveRecord</h2>
+
+      <h3 style="color:#a7f3d0;">Profile</h3>
+      <p class="path">app/models/profile.rb</p>
+      <div class="annotated">
+<pre><code>class Profile &lt; ApplicationRecord
+  belongs_to :user
+  has_many :work_histories, -&gt; { order(start_date: :desc, id: :asc) }, dependent: :destroy
+  has_many :educations,     -&gt; { order(start_date: :desc, id: :asc) }, dependent: :destroy
+  has_many :skills,         -&gt; { order(:name) },                       dependent: :destroy
+
+  validates :name,     length: { maximum: 120 },  allow_blank: true
+  validates :headline, length: { maximum: 200 },  allow_blank: true
+  validates :bio,      length: { maximum: 2000 }, allow_blank: true
+end</code></pre>
+        <div class="annot">
+          <ul>
+            <li><code>belongs_to :user</code> declares an FK and adds a <code>profile.user</code> getter. Implicitly <em>required</em>.</li>
+            <li>The lambdas <code>-&gt; { order(...) }</code> are default scopes for the association — every time you call <code>profile.work_histories</code>, results come back ordered most-recent-first.</li>
+            <li><code>dependent: :destroy</code> ⇒ when the profile is deleted, AR calls <code>destroy</code> on each child (running their callbacks). The DB has no <code>ON DELETE CASCADE</code>; this is enforced in app code.</li>
+            <li>Validations are declarative rules. They run on <code>save</code> and populate <code>record.errors</code> if violated. <code>allow_blank</code> means <code>""</code> / <code>nil</code> skips the rule.</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 style="color:#a7f3d0;">Skill — the <code>name_normalized</code> trick</h3>
+      <p class="path">app/models/skill.rb</p>
+      <div class="annotated">
+<pre><code>class Skill &lt; ApplicationRecord
+  belongs_to :profile, touch: :profile_updated_at
+
+  before_validation :normalize_name
+
+  validates :name,
+            presence: true,
+            length: { maximum: 100 },
+            uniqueness: { scope: :profile_id, case_sensitive: false }
+
+  private
+
+  def normalize_name
+    self.name_normalized = name.to_s.strip.downcase
+  end
+end</code></pre>
+        <div class="annot">
+          <ul>
+            <li><code>touch: :profile_updated_at</code> — whenever a Skill is saved/destroyed, AR also <code>UPDATE</code>s <code>profiles.profile_updated_at = NOW()</code>. That column is what powers the "Last updated…" line on the page.</li>
+            <li><code>before_validation</code> runs <em>before</em> the validators each save. It writes the cleaned value into <code>name_normalized</code> so the DB unique index can do its job.</li>
+            <li><code>uniqueness: { scope: :profile_id, case_sensitive: false }</code> is the AR-level check; the DB unique index on <code>(profile_id, name_normalized)</code> is the safety net for race conditions. Both exist for a reason — see §12.</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 style="color:#a7f3d0;">WorkHistory &amp; Education</h3>
+      <p class="path">app/models/work_history.rb · app/models/education.rb</p>
+      <pre><code>class WorkHistory &lt; ApplicationRecord
+  include DateRange
+  belongs_to :profile, touch: :profile_updated_at
+  validates :company, :title, presence: true, length: { maximum: 200 }
+  validates :start_date, presence: true
+end</code></pre>
+      <p>Same structure for <code>Education</code>. Both <code>include</code> the <code>DateRange</code> concern (next section), reusing the start/end date validator.</p>
+
+      <!-- =========================================================== -->
+      <h2 id="policies">8. Authorization with Pundit</h2>
+      <p>Pundit gives you one Ruby class per model with predicate methods. The flow is:</p>
+      <ol>
+        <li>Controller calls <code>authorize @record</code> (or <code>authorize @record, :create?</code>).</li>
+        <li>Pundit looks up <code>FooPolicy</code> based on the record's class.</li>
+        <li>Calls the matching predicate (<code>create?</code>, <code>update?</code>, <code>destroy?</code>).</li>
+        <li>If it returns <code>false</code>, Pundit raises <code>NotAuthorizedError</code>, which <code>Authorization</code> rescues into a 403 "Forbidden".</li>
+      </ol>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <h4 style="color:var(--policy)">ProfilePolicy</h4>
+          <p class="path">app/policies/profile_policy.rb</p>
+<pre><code>class ProfilePolicy &lt; ApplicationPolicy
+  def edit?    = own_profile?
+  def update?  = own_profile?
+
+  private
+  def own_profile?
+    return false unless user&amp;.member? &amp;&amp; user.active?
+    record.user_id == user.id
+  end
+end</code></pre>
+          <p>Three checks combined: signed-in member, account active, owns the profile.</p>
+        </div>
+
+        <div class="card">
+          <h4 style="color:var(--policy)">Child policies via concern</h4>
+          <p class="path">app/policies/concerns/profile_scoped_policy.rb</p>
+<pre><code>module ProfileScopedPolicy
+  private
+  def own_profile?
+    return false unless user&amp;.member? &amp;&amp; user.active?
+    record.profile&amp;.user_id == user.id
+  end
+end</code></pre>
+          <p>Same idea, but the record is a <code>WorkHistory</code> / <code>Education</code> / <code>Skill</code>, so we hop through <code>record.profile.user_id</code>.</p>
+<pre><code>class WorkHistoryPolicy &lt; ApplicationPolicy
+  include ProfileScopedPolicy
+  def create?  = own_profile?
+  def update?  = own_profile?
+  def destroy? = own_profile?
+end</code></pre>
+        </div>
+      </div>
+
+      <div class="key-callout">
+        <strong>Why a separate concern?</strong> Three policies (<code>WorkHistoryPolicy</code>, <code>EducationPolicy</code>, <code>SkillPolicy</code>) need an identical <code>own_profile?</code>. Extracting it into a module keeps the rule defined in <em>one place</em>. <code>ProfilePolicy</code> defines its own variant because the record itself <em>is</em> the profile, not a child.
+      </div>
+
+      <!-- =========================================================== -->
+      <h2 id="controllers">9. Controllers in detail</h2>
+
+      <h3 style="color:#bfdbfe">ProfilesController</h3>
+      <p class="path">app/controllers/profiles_controller.rb</p>
+      <div class="annotated">
+<pre><code>class ProfilesController &lt; ApplicationController
+  before_action :load_profile
+
+  def edit
+    authorize @profile
+  end
+
+  def update
+    authorize @profile
+    if @profile.update(profile_params)
+      redirect_to edit_profile_path, notice: "Profile updated."
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def load_profile
+    @profile = Current.user.profile || Current.user.create_profile!
+  rescue ActiveRecord::RecordNotUnique
+    @profile = Current.user.reload.profile
+  end
+
+  def profile_params
+    params.expect(profile: %i[name headline bio])
+  end
+end</code></pre>
+        <div class="annot">
+          <ul>
+            <li><code>before_action :load_profile</code> runs <em>before every action</em>. Equivalent to a per-controller middleware that hangs <code>@profile</code> on the request.</li>
+            <li><code>authorize @profile</code> raises if Pundit says no.</li>
+            <li><code>params.expect(...)</code> is Rails 8's strict allow-list. If the body doesn't have a <code>profile:</code> key, it raises. If it has unexpected fields, they're dropped. (Older code uses <code>params.require(:profile).permit(...)</code> — same idea.)</li>
+            <li><code>create_profile!</code> is auto-generated by <code>has_one :profile</code> on <code>User</code>. Equivalent to: "create the associated profile, set the FK, save, raise on failure."</li>
+            <li>The <code>rescue</code> clause is a guard against a race: two simultaneous requests both seeing <code>profile == nil</code>, both inserting. The unique index on <code>profiles.user_id</code> turns the loser into a <code>RecordNotUnique</code>; we catch it and reload the now-existing profile.</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 style="color:#bfdbfe">Profiles::WorkHistoriesController (representative child controller)</h3>
+      <p class="path">app/controllers/profiles/work_histories_controller.rb</p>
+      <div class="annotated">
+<pre><code>class Profiles::WorkHistoriesController &lt; ApplicationController
+  before_action :load_profile
+
+  def create
+    @work_history = @profile.work_histories.build(work_history_params)
+    authorize @work_history
+    if @work_history.save
+      redirect_to edit_profile_path, notice: "Work history added."
+    else
+      @new_work_history = @work_history
+      render template: "profiles/edit", status: :unprocessable_entity
+    end
+  end
+
+  def update
+    @work_history = @profile.work_histories.find(params[:id])
+    authorize @work_history
+    if @work_history.update(work_history_params)
+      redirect_to edit_profile_path, notice: "Work history updated."
+    else
+      @errored_work_history = @work_history
+      render template: "profiles/edit", status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    @work_history = @profile.work_histories.find(params[:id])
+    authorize @work_history
+    @work_history.destroy
+    redirect_to edit_profile_path, notice: "Work history removed."
+  end
+
+  private
+
+  def load_profile
+    @profile = Current.user.profile || Current.user.build_profile
+  end
+
+  def work_history_params
+    params.expect(work_history: %i[company title start_date end_date description])
+  end
+end</code></pre>
+        <div class="annot">
+          <ul>
+            <li><code>@profile.work_histories.find(params[:id])</code> — <em>scoped</em> finder. If you try to update someone else's work history by guessing an id, this throws <code>RecordNotFound</code> because the row is not in <em>this profile's</em> collection. (Pundit is the second line of defense.)</li>
+            <li><code>build</code> is "new in memory, FK already set, not yet saved". Equivalent to <code>new WorkHistory({ profileId: @profile.id, ...params })</code>.</li>
+            <li>On validation failure we re-render the <em>edit</em> template (not redirect), and we stash the unsaved record in <code>@new_work_history</code> or <code>@errored_work_history</code> so the partial can show the user's bad input + error messages — see §11.</li>
+            <li>Why <code>build_profile</code> here but <code>create_profile!</code> in <code>ProfilesController</code>? A child create is meaningless without a saved profile. In practice we never reach this controller without a profile (UI gates it), and if we ever did, <code>save</code> would create the parent transparently. Defensive but not strictly required.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- =========================================================== -->
+      <h2 id="concerns">10. Concerns — Ruby's mixin pattern</h2>
+
+      <p>A <em>concern</em> is a Ruby <code>module</code> meant to be <code>include</code>d into a class. Think of it as <code>extends</code> + interface defaults in TS, but more like trait composition.</p>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <h4 style="color:var(--concern)">DateRange</h4>
+          <p class="path">app/models/concerns/date_range.rb</p>
+<pre><code>module DateRange
+  extend ActiveSupport::Concern
+
+  included do
+    validate :end_date_after_start_date
+  end
+
+  private
+
+  def end_date_after_start_date
+    return if end_date.blank? || start_date.blank?
+    errors.add(:end_date, "must be on or after start date") if end_date &lt; start_date
+  end
+end</code></pre>
+          <p>The <code>included do … end</code> block runs <em>in the context of the including class</em> — same as if you'd written <code>validate :end_date_after_start_date</code> directly inside <code>WorkHistory</code> and <code>Education</code>.</p>
+        </div>
+
+        <div class="card">
+          <h4 style="color:var(--concern)">ProfileScopedPolicy</h4>
+          <p class="path">app/policies/concerns/profile_scoped_policy.rb</p>
+<pre><code>module ProfileScopedPolicy
+  extend ActiveSupport::Concern
+
+  private
+
+  def own_profile?
+    return false unless user&amp;.member? &amp;&amp; user.active?
+    record.profile&amp;.user_id == user.id
+  end
+end</code></pre>
+          <p>Three policies all answer "is the requester the owner of the parent profile?" exactly the same way. The concern lets each policy say <code>include ProfileScopedPolicy</code> and then just declare <em>which actions</em> are allowed.</p>
+        </div>
+      </div>
+
+      <!-- =========================================================== -->
+      <h2 id="views">11. Views &amp; partials</h2>
+
+      <p>Rails serves HTML by default. The page is composed bottom-up:</p>
+
+<pre><code>app/views/profiles/edit.html.erb            <span style="color:var(--muted)"># the page</span>
+├── _basic_form.html.erb                    <span style="color:var(--muted)"># PATCH /profile</span>
+├── _work_histories.html.erb                <span style="color:var(--muted)"># list + “add” form</span>
+│     └── _work_history_form.html.erb       <span style="color:var(--muted)"># reused for new + edit</span>
+├── _educations.html.erb
+│     └── _education_form.html.erb
+└── _skills.html.erb</code></pre>
+
+      <p>The leading underscore on filenames marks them as <em>partials</em> (must be rendered, can't be served). Rendering looks like:</p>
+<pre><code>&lt;%= render "profiles/work_histories", profile: @profile %&gt;</code></pre>
+
+      <h4>Two important UX details to notice in the partials</h4>
+
+      <div class="grid grid-2">
+        <div class="card tight">
+          <h4 style="color:var(--view)">Same form, two URLs</h4>
+<pre><code>&lt;%
+  url    = entry.persisted? ? profile_work_history_path(entry) : profile_work_histories_path
+  method = entry.persisted? ? :patch : :post
+%&gt;
+&lt;%= form_with model: entry, url: url, method: method, ...&gt;</code></pre>
+          <p>One partial renders both "create" (POST collection URL) and "edit" (PATCH member URL). <code>persisted?</code> is true once the record has an <code>id</code> from the DB.</p>
+        </div>
+
+        <div class="card tight">
+          <h4 style="color:var(--view)">Showing the bad submission</h4>
+<pre><code>&lt;% form_entry = (@errored_work_history&amp;.id == entry.id) ? @errored_work_history : entry %&gt;
+&lt;%= render "profiles/work_history_form", entry: form_entry %&gt;</code></pre>
+          <p>If a particular item failed validation, the controller stashed it in <code>@errored_work_history</code>. The list partial swaps in that in-memory record (with <code>.errors</code> attached) only for that one row — every other row stays in its clean DB state.</p>
+        </div>
+      </div>
+
+      <p style="margin-top:14px;">Other helpers worth knowing:</p>
+      <ul>
+        <li><code>form_with model: entry</code> — generates labeled inputs, a CSRF token, and the right verb based on <code>persisted?</code>. The TS-equivalent would be writing &lt;form&gt; + &lt;input&gt; manually.</li>
+        <li><code>button_to "Remove", path, method: :delete</code> — emits a tiny standalone form. Plain <code>&lt;a href&gt;</code> can't issue DELETE; this wraps it in a form so the browser actually does a POST with a hidden <code>_method=delete</code> field that Rails reinterprets.</li>
+        <li><code>data: { turbo_confirm: "..." }</code> — the Turbo (Hotwire) JS picks this up and shows a native <code>confirm()</code> before submitting.</li>
+        <li><code>dom_id(entry)</code> → e.g. <code>"work_history_42"</code>; just a stable id you can target in CSS / tests.</li>
+      </ul>
+
+      <!-- =========================================================== -->
+      <h2 id="race">12. Subtle bits worth understanding</h2>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <h4 style="color:#fde68a">a. Lazy profile creation</h4>
+          <p>The DB has <code>profiles.user_id</code> as a NOT NULL unique FK, but a user is <em>created</em> without a profile (registration only writes to <code>users</code>). So the first hit to <code>/profile/edit</code> creates one on demand:</p>
+<pre><code>@profile = Current.user.profile || Current.user.create_profile!</code></pre>
+          <p>The <code>rescue ActiveRecord::RecordNotUnique</code> catches the case where two simultaneous requests both see "no profile" and both try to insert — the unique index makes one of them fail, and we just reload the row that the other request already inserted.</p>
+        </div>
+
+        <div class="card">
+          <h4 style="color:#fde68a">b. <code>touch</code> + <code>profile_updated_at</code></h4>
+          <p><code>belongs_to :profile, touch: :profile_updated_at</code> on each child means: any time a child is saved or deleted, AR also bumps <code>profiles.profile_updated_at</code>. That timestamp drives the "Last updated …" line on the edit page. It's <em>separate</em> from the auto-managed <code>updated_at</code> column so you can update the profile row itself without affecting it (or vice versa).</p>
+        </div>
+
+        <div class="card">
+          <h4 style="color:#fde68a">c. Two layers of skill uniqueness</h4>
+          <p>The model has <code>validates :name, uniqueness: { scope: :profile_id, case_sensitive: false }</code>. The DB has a unique index on <code>(profile_id, name_normalized)</code>. Why both?</p>
+          <ul>
+            <li><strong>App-level</strong> gives a friendly form error message and keeps the user's submission in the form.</li>
+            <li><strong>DB-level</strong> is the only thing that actually prevents duplicates under concurrency — two app processes can both pass the AR check and try to insert. The DB will reject one with <code>RecordNotUnique</code>.</li>
+          </ul>
+          <p>This branch doesn't catch <code>RecordNotUnique</code> in the skills controller — under the rare race the user just sees a 500. That's a known small gap.</p>
+        </div>
+
+        <div class="card">
+          <h4 style="color:#fde68a">d. <code>Current</code> attributes</h4>
+          <p><code>Current.user</code> is set per-request by the <code>Authentication</code> concern. It's implemented with <code>ActiveSupport::CurrentAttributes</code>, which is essentially Ruby's equivalent of <code>AsyncLocalStorage</code> with a clean reset between requests. That's how Pundit's policies pick up the user without the controller passing it in explicitly:</p>
+<pre><code># app/controllers/concerns/authorization.rb
+def pundit_user
+  Current.user
+end</code></pre>
+        </div>
+
+        <div class="card">
+          <h4 style="color:#fde68a">e. <code>scope module: :profiles</code> vs <code>namespace</code></h4>
+          <p>Both nest controllers under a folder. The difference:</p>
+          <ul>
+            <li><code>namespace :admin do … end</code> nests <strong>both</strong> the URL prefix (<code>/admin/...</code>) <em>and</em> the controller path (<code>app/controllers/admin/...</code>).</li>
+            <li><code>scope module: :profiles</code> nests <em>only</em> the controller path. URL stays <code>/profile/...</code>.</li>
+          </ul>
+          <p>This branch uses the second so URLs read naturally (<code>/profile/skills</code>) while controllers stay grouped (<code>app/controllers/profiles/</code>).</p>
+        </div>
+
+        <div class="card">
+          <h4 style="color:#fde68a">f. <code>params.expect</code> vs <code>params.permit</code></h4>
+          <p>Both are allow-lists for incoming data. <code>permit</code> just filters; <code>expect</code> (Rails 8) additionally <em>requires</em> the wrapping key and proper shape, raising a 400-style error if missing. Think Zod's <code>.parse</code> vs <code>.safeParse</code>.</p>
+        </div>
+      </div>
+
+      <!-- =========================================================== -->
+      <h2 id="cheatsheet">13. Cheatsheet — what each file is responsible for</h2>
+
+      <div class="table-scroll"><table>
+        <thead><tr><th>File</th><th>Responsibility</th></tr></thead>
+        <tbody>
+          <tr><td><code>config/routes.rb</code> <span class="pill route">routes</span></td><td>Declares URL → controller mapping. Adds <code>/profile</code> + 3 nested resources.</td></tr>
+          <tr><td><code>db/migrate/2026...11_create_profiles.rb</code> <span class="pill db">migration</span></td><td>Creates <code>profiles</code> with unique <code>user_id</code> FK + <code>profile_updated_at</code>.</td></tr>
+          <tr><td><code>db/migrate/...12_create_work_histories.rb</code></td><td>Creates <code>work_histories</code>; NOT NULL on company/title/start_date.</td></tr>
+          <tr><td><code>db/migrate/...13_create_educations.rb</code></td><td>Creates <code>educations</code>; only <code>school</code> is NOT NULL.</td></tr>
+          <tr><td><code>db/migrate/...14_create_skills.rb</code></td><td>Creates <code>skills</code> + unique index on <code>(profile_id, name_normalized)</code>.</td></tr>
+          <tr><td><code>app/models/profile.rb</code> <span class="pill model">model</span></td><td>Associations, ordered child collections, length validations.</td></tr>
+          <tr><td><code>app/models/work_history.rb</code> / <code>education.rb</code></td><td><code>belongs_to :profile, touch: …</code>, presence/length validations, <code>include DateRange</code>.</td></tr>
+          <tr><td><code>app/models/skill.rb</code></td><td>Same plus <code>before_validation :normalize_name</code> + scoped uniqueness.</td></tr>
+          <tr><td><code>app/models/concerns/date_range.rb</code> <span class="pill concern">concern</span></td><td>Reusable "end_date ≥ start_date" validator.</td></tr>
+          <tr><td><code>app/models/user.rb</code></td><td>Adds <code>has_one :profile, dependent: :destroy</code>.</td></tr>
+          <tr><td><code>app/policies/profile_policy.rb</code> <span class="pill policy">policy</span></td><td><code>edit?</code>/<code>update?</code> = active member &amp; <code>record.user_id == user.id</code>.</td></tr>
+          <tr><td><code>app/policies/{work_history,education,skill}_policy.rb</code></td><td>Same idea via the shared concern; only specific verbs are allowed.</td></tr>
+          <tr><td><code>app/policies/concerns/profile_scoped_policy.rb</code></td><td>Shared <code>own_profile?</code> implementation for child policies.</td></tr>
+          <tr><td><code>app/controllers/profiles_controller.rb</code> <span class="pill ctrl">controller</span></td><td>Lazy profile create-or-load, basic info update.</td></tr>
+          <tr><td><code>app/controllers/profiles/work_histories_controller.rb</code></td><td>Create/update/destroy a work_history scoped to current user's profile.</td></tr>
+          <tr><td><code>app/controllers/profiles/educations_controller.rb</code></td><td>Same shape, for educations.</td></tr>
+          <tr><td><code>app/controllers/profiles/skills_controller.rb</code></td><td>Create/destroy only — skills are immutable once created (you delete and re-add).</td></tr>
+          <tr><td><code>app/views/profiles/edit.html.erb</code> <span class="pill view">view</span></td><td>The single edit page; renders four section partials.</td></tr>
+          <tr><td><code>app/views/profiles/_basic_form.html.erb</code></td><td>Form for name/headline/bio.</td></tr>
+          <tr><td><code>app/views/profiles/_work_histories.html.erb</code> + <code>_work_history_form.html.erb</code></td><td>List + add form + per-item edit form. Shared form partial.</td></tr>
+          <tr><td><code>app/views/profiles/_educations.html.erb</code> + <code>_education_form.html.erb</code></td><td>Same shape, for education entries.</td></tr>
+          <tr><td><code>app/views/profiles/_skills.html.erb</code></td><td>Pill list with inline "add skill" form.</td></tr>
+          <tr><td><code>app/views/home/show.html.erb</code></td><td>Adds an "Edit my profile" link, gated by <code>policy(profile).edit?</code>.</td></tr>
+        </tbody>
+      </table></div>
+
+      <hr/>
+
+      <p style="color:var(--muted); font-size:13px;">
+        Generated for <code>kenfdev@gmail.com</code> · 2026-05-10 · view at
+        <code>.ai-tmp/profile-feature-explainer.html</code>.
+      </p>
+    </main>
+  </div>
+</body>
+</html>
