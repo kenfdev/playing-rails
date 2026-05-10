@@ -50,3 +50,9 @@
 
 # Local AI scratch artifacts
 /.ai-tmp/
+
+# Node tooling for Playwright system tests
+/node_modules/
+
+# Playwright system-test artifacts (failure screenshots, traces)
+/tmp/screenshots/

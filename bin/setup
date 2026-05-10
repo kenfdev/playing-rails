@@ -15,6 +15,12 @@ FileUtils.chdir APP_ROOT do
   puts "== Installing dependencies =="
   system("bundle check") || system!("bundle install")
 
+  puts "\n== Installing Playwright (Node) =="
+  system! "npm install"
+  # System libs are baked into the dev image (.worktree/Dockerfile.app),
+  # so --with-deps isn't needed (it would also require sudo).
+  system! "npx playwright install chromium"
+
   # puts "\n== Copying sample files =="
   # unless File.exist?("config/database.yml")
   #   FileUtils.cp "config/database.yml.sample", "config/database.yml"

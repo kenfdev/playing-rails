@@ -154,6 +154,10 @@ GEM
       rack-test (>= 0.6.3)
       regexp_parser (>= 1.5, < 3.0)
       xpath (~> 3.2)
+    capybara-playwright-driver (0.5.9)
+      addressable
+      capybara
+      playwright-ruby-client (>= 1.16.0)
     concurrent-ruby (1.3.6)
     connection_pool (3.0.2)
     console (1.34.3)
@@ -295,6 +299,10 @@ GEM
     marcel (1.1.0)
     matrix (0.4.3)
     metrics (0.15.0)
+    mime-types (3.7.0)
+      logger
+      mime-types-data (~> 3.2025, >= 3.2025.0507)
+    mime-types-data (3.2026.0414)
     mini_magick (5.3.1)
       logger
     mini_mime (1.1.5)
@@ -515,6 +523,10 @@ GEM
     parser (3.3.11.1)
       ast (~> 2.4.1)
       racc
+    playwright-ruby-client (1.59.1)
+      base64
+      concurrent-ruby (>= 1.1.6)
+      mime-types (>= 3.0)
     pp (0.6.3)
       prettyprint
     prettyprint (0.2.0)
@@ -539,6 +551,8 @@ GEM
       date
       stringio
     public_suffix (7.0.5)
+    puma (8.0.1)
+      nio4r (~> 2.0)
     pundit (2.5.2)
       activesupport (>= 3.0.0)
     raabro (1.4.0)
@@ -638,17 +652,10 @@ GEM
     rubydex (0.2.2-arm64-darwin)
     rubydex (0.2.2-x86_64-darwin)
     rubydex (0.2.2-x86_64-linux)
-    rubyzip (3.3.0)
     samovar (2.4.1)
       console (~> 1.0)
       mapping (~> 1.0)
     securerandom (0.4.1)
-    selenium-webdriver (4.43.0)
-      base64 (~> 0.2)
-      logger (~> 1.4)
-      rexml (~> 3.2, >= 3.2.5)
-      rubyzip (>= 1.2.2, < 4.0)
-      websocket (~> 1.0)
     solid_cable (3.0.12)
       actioncable (>= 7.2)
       activejob (>= 7.2)
@@ -755,7 +762,6 @@ GEM
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
-    websocket (1.2.11)
     websocket-driver (0.8.0)
       base64
       websocket-extensions (>= 0.1.0)
@@ -783,6 +789,7 @@ DEPENDENCIES
   brakeman
   bundler-audit
   capybara
+  capybara-playwright-driver
   database_cleaner-active_record
   debug
   factory_bot_rails
@@ -796,10 +803,10 @@ DEPENDENCIES
   opentelemetry-instrumentation-all
   opentelemetry-sdk
   propshaft
+  puma
   pundit
   rails (~> 8.1.3)
   rubocop-rails-omakase
-  selenium-webdriver
   solid_cable
   solid_cache
   solid_queue
