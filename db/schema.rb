@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_09_214314) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_10_120000) do
   create_table "educations", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "degree"
@@ -32,6 +32,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_09_214314) do
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
     t.index ["user_id"], name: "index_profiles_on_user_id", unique: true
+  end
+
+  create_table "salaries", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "current_amount"
+    t.integer "expected_max"
+    t.integer "expected_min"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_salaries_on_user_id", unique: true
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -77,6 +87,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_09_214314) do
 
   add_foreign_key "educations", "profiles"
   add_foreign_key "profiles", "users"
+  add_foreign_key "salaries", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "skills", "profiles"
   add_foreign_key "work_histories", "profiles"

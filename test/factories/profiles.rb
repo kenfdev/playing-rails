@@ -30,4 +30,11 @@ FactoryBot.define do
     profile
     sequence(:name) { |n| "Skill #{n}" }
   end
+
+  factory :salary do
+    user
+    current_amount { 100_000 }
+    expected_min   { 110_000 }
+    expected_max   { 130_000 }
+  end
 end
