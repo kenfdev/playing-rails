@@ -20,4 +20,15 @@
   <%= render "profiles/work_histories", profile: @profile %>
   <%= render "profiles/educations",     profile: @profile %>
   <%= render "profiles/skills",         profile: @profile %>
+
+  <% if Current.user&.member? %>
+    <aside class="border border-gray-200 rounded-lg p-5 space-y-2 bg-gray-50">
+      <h2 class="font-semibold text-xl">Salary (private)</h2>
+      <p class="text-gray-600 text-sm">
+        Salary information is kept on a separate page and never appears on your public profile.
+      </p>
+      <%= link_to "Edit salary", edit_profile_salary_path,
+                  class: "text-blue-600 underline hover:no-underline" %>
+    </aside>
+  <% end %>
 </div>

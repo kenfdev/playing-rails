@@ -10,6 +10,7 @@ Rails.application.routes.draw do
       resources :work_histories, only: %i[create update destroy]
       resources :educations,     only: %i[create update destroy]
       resources :skills,         only: %i[create destroy]
+      resource  :salary,         only: %i[edit update]
     end
   end
 
