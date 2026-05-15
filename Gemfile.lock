@@ -137,7 +137,7 @@ GEM
     benchmark (0.5.0)
     bigdecimal (4.1.2)
     bindex (0.8.1)
-    bootsnap (1.24.3)
+    bootsnap (1.24.4)
       msgpack (~> 1.2)
     brakeman (8.0.4)
       racc
@@ -203,8 +203,6 @@ GEM
       samovar (~> 2.3)
     ffi (1.17.4-aarch64-linux-gnu)
     ffi (1.17.4-aarch64-linux-musl)
-    ffi (1.17.4-arm-linux-gnu)
-    ffi (1.17.4-arm-linux-musl)
     ffi (1.17.4-arm64-darwin)
     ffi (1.17.4-x86_64-darwin)
     ffi (1.17.4-x86_64-linux-gnu)
@@ -329,10 +327,6 @@ GEM
     nokogiri (1.19.3-aarch64-linux-gnu)
       racc (~> 1.4)
     nokogiri (1.19.3-aarch64-linux-musl)
-      racc (~> 1.4)
-    nokogiri (1.19.3-arm-linux-gnu)
-      racc (~> 1.4)
-    nokogiri (1.19.3-arm-linux-musl)
       racc (~> 1.4)
     nokogiri (1.19.3-arm64-darwin)
       racc (~> 1.4)
@@ -691,8 +685,6 @@ GEM
       thor (>= 0.19.2)
     sqlite3 (2.9.4-aarch64-linux-gnu)
     sqlite3 (2.9.4-aarch64-linux-musl)
-    sqlite3 (2.9.4-arm-linux-gnu)
-    sqlite3 (2.9.4-arm-linux-musl)
     sqlite3 (2.9.4-arm64-darwin)
     sqlite3 (2.9.4-x86_64-darwin)
     sqlite3 (2.9.4-x86_64-linux-gnu)
@@ -774,8 +766,6 @@ PLATFORMS
   aarch64-linux
   aarch64-linux-gnu
   aarch64-linux-musl
-  arm-linux-gnu
-  arm-linux-musl
   arm64-darwin
   x86_64-darwin
   x86_64-linux
